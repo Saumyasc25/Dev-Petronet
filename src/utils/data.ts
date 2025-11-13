@@ -70,6 +70,16 @@ export const MOC_HEADER_DATA: ITableHeader[] = [
   { name: "action", display: "Action" },
   {name: "mocClosure" , display: "MOC Closure" },
 ]
+export const GATEPASS_HEADER_DATA: ITableHeader[] = [
+  { name: "moc_request_no", display: "Gate Pass No." },
+  { name: "type", display: "Type" },
+  { name: "date", display: "Date" },
+  { name: "station_name", display: "Station" },
+  { name: "title", display: "Purpose" },
+  { name: "created_by", display: "Initiated By" },
+  { name: "status", display: "Status" },
+  { name: "action", display: "Action" },
+]
 
 export const USER_STRUCTURE_HEADER_DATA: ITableHeader[] = [
   { name: "slNo", display: "S.No.", visible: true },

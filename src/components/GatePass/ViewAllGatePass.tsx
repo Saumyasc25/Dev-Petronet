@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
-import BasicTable from "@/components/tables/BasicTable";
-import { MOC_HEADER_DATA } from "@/utils/data";
+import { GATEPASS_HEADER_DATA } from "@/utils/data";
 import { useNavigate } from "react-router-dom";
-import MocTopHeader from "./MocTopHeader";
 import api from "@/api/axiosInstance";
-import MocDropdown from "./MocDropdown"; // Ensure this is imported
 import { Search } from "lucide-react";
+import MocTopHeader from "../moc/MocTopHeader";
+import GPFilterDD from "../GatePass/GPFilterDD";
+import { FileUp } from "lucide-react";
+import GPTypeFilter from "./GPTypeFilter";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import GPBasicTable from "../tables/GPBasicTable";
 
 // Interface for advanced filters to ensure type safety
 interface MocFilters {
@@ -25,10 +29,9 @@ interface IMOCTableRow {
   date: string;
   status: string;
   action: string;
-  mocClosure?: string;
 }
 
-const MocViewAll = () => {
+const ViewAllGatePass = () => {
   const [tableData, setTableData] = useState<IMOCTableRow[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStation, setSelectedStation] = useState<string>("");
@@ -39,6 +42,33 @@ const MocViewAll = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(1000);
   
+  const handleExport = () => {
+  try {
+    if (!currentItems || currentItems.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    // Convert visible table data to worksheet
+    const worksheet = XLSX.utils.json_to_sheet(currentItems);
+
+    // Create a workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Gate Pass Data");
+
+    // Generate Excel file
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+
+    // Trigger file download
+    saveAs(blob, `GatePassData_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  } catch (error) {
+    console.error("Export failed:", error);
+  }
+};
+
+
+
   // 💡 NEW STATE FOR ADVANCED FILTERS
   const [activeFilters, setActiveFilters] = useState<MocFilters>({
     created_by: "",
@@ -74,7 +104,6 @@ const MocViewAll = () => {
             date: item.date?.split("T")[0] || "", 
             status: item.status || "-",
             action: "",
-            mocClosure: "",
           }));
           setTableData(formatted);
         } else {
@@ -152,52 +181,64 @@ const MocViewAll = () => {
 
     return matchesSearch && matchesStation && matchesDays && matchesAdvanced;
   });
-
+   const handleTabChange = (selectedTab: string) => {
+    console.log("Selected tab:", selectedTab);
+    // You can trigger filter logic here
+  };
   // Use all filtered data (no pagination)
   const currentItems = filteredData.map((item, idx) => ({
     ...item,
     serialNumber: idx + 1,
   }));
 
-  const renderModal = () => <div>Modal Content</div>;
-  const renderDeleteModal = () => <div>Delete Modal Content</div>;
-
   return (
     <div className="flex flex-col h-screen overflow-visible">
       <div className="rounded-md mb-2 mt-2">
         <MocTopHeader
-          title="All Moc Requests"
-          subTitle="Browse and filter all change requests"
+          title="All Gate Passes"
+          subTitle="View, print, and manage all gate passes"
         />
       </div>
 
       <div className="flex items-center justify-between mb-2">
-        {/* Search bar */}
+        {/* Search bar (left aligned) */}
         <div className="w-1/2 relative">
-          <Search
+            <Search
             className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-          />
-          <input
+            />
+            <input
             type="text"
-            placeholder="Search by title, request number, or department..."
+            placeholder="Search by ID, name, vehicle..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-4 py-1 pl-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
+            />
         </div>
-        {/* Right aligned dropdown */}
-        <div className="ml-auto">
-          <MocDropdown
+
+        {/* Right-aligned section (Filter + Export side by side) */}
+        <div className="flex items-center gap-3 ml-auto">
+            <GPFilterDD
             onStationSelect={setSelectedStation}
-            onTimeSelect={setSelectedDays}
             onApplyFilter={(filters) => {
                 setActiveFilters(filters);
-                setTriggerFilter(prev => prev + 1); 
+                setTriggerFilter(prev => prev + 1);
             }}
             mocData={tableData}
-          />
+            />
+
+            <button
+            onClick={handleExport}
+            className="flex items-center gap-2 border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 rounded-lg px-4 py-2 text-xs shadow-sm transition"
+            >
+            <FileUp size={16} />
+            Export
+            </button>
         </div>
+        </div>
+      <div >
+        <GPTypeFilter onTabSelect={handleTabChange} />
       </div>
+
 
       {/* Table Section */}
       <div className="flex-1 overflow-x-hidden ">
@@ -206,8 +247,8 @@ const MocViewAll = () => {
             <div>Loading...</div>
           </div>
         ) : (
-          <BasicTable
-            tableHeader={MOC_HEADER_DATA}
+          <GPBasicTable
+            tableHeader={GATEPASS_HEADER_DATA}
             tableData={currentItems as any}
             handleClickEditAction={handleClickEditAction}
             handleClickViewAction={handleClickViewAction as unknown as (row: any) => void}
@@ -229,11 +270,9 @@ const MocViewAll = () => {
         </button>
       </div>
 
-      {modal && renderModal()}
-      {modalDelete && renderDeleteModal()}
     </div>
   );
 };
 
-export default MocViewAll;
+export default ViewAllGatePass;
 
