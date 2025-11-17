@@ -71,13 +71,13 @@ export const MOC_HEADER_DATA: ITableHeader[] = [
   {name: "mocClosure" , display: "MOC Closure" },
 ]
 export const GATEPASS_HEADER_DATA: ITableHeader[] = [
-  { name: "moc_request_no", display: "Gate Pass No." },
-  { name: "type", display: "Type" },
-  { name: "date", display: "Date" },
-  { name: "station_name", display: "Station" },
-  { name: "title", display: "Purpose" },
-  { name: "created_by", display: "Initiated By" },
+  { name: "gate_pass_no", display: "Gate Pass No." },
+  { name: "formtype", display: "Type" },
   { name: "status", display: "Status" },
+  { name: "date_time", display: "Date" },
+  { name: "station", display: "Station" },
+  { name: "purpose", display: "Purpose" },
+  { name: "created_by", display: "Initiated By" },
   { name: "action", display: "Action" },
 ]
 

@@ -33,6 +33,7 @@ import ReviewerClosure from "@/components/MocClosure/ReviewerClosure"
 import ApproverClosure from "@/components/MocClosure/ApproverClosure"
 import MocDraftFormCreation from "./MocRequestManagement/MocDraftFormCreation"
 import ViewAllGatePass from "@/components/GatePass/ViewAllGatePass"
+import GatePassDashboard from "@/components/GatePass/GatePassDashboard"
 // import ReviewDashboard from "@/components/MocReview/ReviewDashboard"
 // import ReviewDashboard from "@/components/MocReview/ReviewDashboard"
 
@@ -568,6 +569,21 @@ const AppRouter: React.FunctionComponent<INavbarProps> = ({ isOpenMenu }) => {
           />
           <Route
             path="/station-operations/gate-pass"
+            element={
+              <AccessWrapper
+                user={user}
+                accessRole={
+                  !!user?.menuSubMenuDetails
+                    ?.flatMap(menu => menu.subMenus.map(sub => sub.subMenuUrl))
+                    .includes("/station-operations/gate-pass") // ✅ parent route
+                }
+              >
+                <GatePassDashboard />
+              </AccessWrapper>
+            }
+          />
+          <Route
+            path="/station-operations/gate-pass/viewAll"
             element={
               <AccessWrapper
                 user={user}
